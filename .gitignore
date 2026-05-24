@@ -1,0 +1,5 @@
+# Session transcripts
+*.jsonl
+
+# User task data
+tasks.json
