@@ -3,3 +3,6 @@
 
 # User task data
 tasks.json
+
+# Python
+__pycache__/

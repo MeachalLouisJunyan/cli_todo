@@ -8,6 +8,8 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+import audio_convert as _plugin_audio
+
 # Fix Unicode output on Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -182,6 +184,9 @@ def main():
     sub.add_parser("clean", help="Remove all completed tasks")
     sub.add_parser("stats", aliases=["st"], help="Show statistics")
 
+    # ── Plugin: audio converter ──
+    plugin_handlers = _plugin_audio.register(sub)
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -198,7 +203,14 @@ def main():
         "clean": cmd_clean,
         "stats": cmd_stats, "st": cmd_stats,
     }
-    handlers[args.command](args)
+
+    # Nested subcommand routing (e.g. "audio convert")
+    key = (args.command, getattr(args, "audio_cmd", None))
+    handler = plugin_handlers.get(key) if key[1] else handlers.get(args.command)
+    if handler:
+        handler(args)
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":
